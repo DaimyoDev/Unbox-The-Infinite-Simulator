@@ -11,13 +11,18 @@ Enemy.Head.Color = skinColor
 Enemy["Left Arm"].Color = skinColor
 Enemy["Right Arm"].Color = skinColor
 
+legColor = nil
+skinColor = nil
+
+Enemy.Humanoid.WalkSpeed = 40
+
 local PathFindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players"):GetChildren()
 local playerData = {}
 local playerDistances = {}
 for _, player in Players do
-    local distanceX = math.abs(math.floor(Enemy.HumanoidRootPart.Position.X - player.Character.HumanoidRootPart.Position.X))
-    local distanceZ = math.abs(math.floor(Enemy.HumanoidRootPart.Position.Z - player.Character.HumanoidRootPart.Position.Z))
+    local distanceX = math.abs(Enemy.HumanoidRootPart.Position.X - player.Character.HumanoidRootPart.Position.X)
+    local distanceZ = math.abs(Enemy.HumanoidRootPart.Position.Z - player.Character.HumanoidRootPart.Position.Z)
     local distance = distanceX + distanceZ
     table.insert(playerData, {name = player, distance = distance})
 end
@@ -37,7 +42,7 @@ for _, player in playerData do
     end
 end
 local agentParams = {
-AgentRadius = 2,
+AgentRadius = 10,
 AgentHeight = 1,
 AgentCanJump = true,
 AgentJumpHeight = 10
@@ -46,44 +51,51 @@ local path = PathFindingService:CreatePath(agentParams)
 local reachedConnection
 local nextWaypointIndex
 local waypoints
-local walkAnimation = Instance.new("Animation")
-walkAnimation.AnimationId = "http://www.roblox.com/asset/?id=180426354"
-local walkAnimationTrack = Enemy.Humanoid:LoadAnimation(walkAnimation)
-local walkAnimationPlaying = false
+local cooldown = false
 
 while playerChosen do
+    local playerPosition = chosenPlayer.Character.HumanoidRootPart.Position
+    local destination = playerPosition + (chosenPlayer.Character.HumanoidRootPart.AssemblyLinearVelocity) / 1.7
     task.wait(0.1)
+    cooldown = false
+    Enemy.HumanoidRootPart.Touched:Connect(function(otherPart)
+        local character = otherPart.Parent:FindFirstChild("Humanoid")
+        if character ~= nil and cooldown == false then
+            print("yes")
+            character:TakeDamage(10)
+            cooldown = true
+
+        end
+    end)
+
     local success = pcall(function()  
-        path:ComputeAsync(Enemy.HumanoidRootPart.Position, chosenPlayer.Character.HumanoidRootPart.Position)
+        path:ComputeAsync(Enemy.HumanoidRootPart.Position, destination)
     end)
     
     if success and path.Status == Enum.PathStatus.Success then
         waypoints = path:GetWaypoints()
 
         for _, waypoint in waypoints do
-            if waypoint.Action == Enum.PathWaypointAction.Jump then
+            local waypointPart = Instance.new("Part")
+            waypointPart.Parent = game.Workspace
+            waypointPart.Position = waypoint.Position
+            waypointPart.CanCollide = false
+           if waypoint.Action == Enum.PathWaypointAction.Jump then
                 Enemy.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
                 task.wait(1)
-                Enemy.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-            end
+               Enemy.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+           end
         end
 
-        if not reachedConnection then
+       if not reachedConnection then
             reachedConnection = Enemy.Humanoid.MoveToFinished:Connect(function(reached)
                 if reached and nextWaypointIndex < #waypoints then
-                    nextWaypointIndex += 1
-                    Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
-                else
-                    walkAnimationPlaying = false
-                    walkAnimationTrack:Stop()
+                   nextWaypointIndex += 1
+                    Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position, chosenPlayer.Character.HumanoidRootPart)
                 end
             end)
         end
         nextWaypointIndex = 2
-        Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
-        if not walkAnimationPlaying then
-            walkAnimationPlaying = true
-            walkAnimationTrack:Play()
-        end
+        Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position, chosenPlayer.Character.HumanoidRootPart)
     end
 end
