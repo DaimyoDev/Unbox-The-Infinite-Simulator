@@ -67,16 +67,13 @@ local nextWaypointIndex
 local waypoints
 local cooldown = false
 local Client_Helpers = require(game.ReplicatedStorage.Shared.client_helpers)
-local diedConnection
 
 local function chaseTarget(chosenPlayer)
 
     local playerPosition = chosenPlayer.Character.HumanoidRootPart.Position
     local destination = playerPosition + (chosenPlayer.Character.HumanoidRootPart.AssemblyLinearVelocity) / 1.7
-    diedConnection = chosenPlayer.Character.Humanoid.Died:Connect(function()
+    chosenPlayer.Character.Humanoid.Died:Connect(function()
             findNewPlayer()
-            diedConnection:Disconnect()
-            diedConnection = nil
             return
         end)
     task.wait(0.1)
