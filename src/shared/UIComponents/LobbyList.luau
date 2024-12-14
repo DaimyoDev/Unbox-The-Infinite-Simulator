@@ -1,50 +1,183 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local React = require(ReplicatedStorage.Shared.Packages.react)
+local LobbyEvent = ReplicatedStorage.Shared.Remote_Events.LobbyEvent
 
 
 local LobbyList = React.Component:extend("LobbyList")
 
 function LobbyList:init()
     self.state = {
-        lobbies = {
-            {id = 1, name = "Lobby A", players = 3},
-            {id = 2, name = "Lobby B", players = 5},
-            {id = 3, name = "Lobby C", players = 2}
-        }
+        lobbies = {},
+        isCreatingLobby = false,
+        isInLobby = false,
+        currentLobby = {}
     }
 
-    self.addLobbyItem = function()
-        self:setState(function(prevState)
-            local newLobbies = prevState.lobbies
-            local newLobbyNumber = #newLobbies + 1
-            table.insert(newLobbies, {name = `Lobby {newLobbyNumber}`, players = math.random(1, 10)})
-            return {lobbies = newLobbies}
-        end)
-    end
+    LobbyEvent.OnClientEvent:Connect(function(Newlobbies) 
+        self:setState({lobbies = Newlobbies})
+    end)
 
 end
 
-function LobbyList:render()
-    return React.createElement("ScrollingFrame", {
-        Size = UDim2.new(0.5, 0, 1.1, 0),
-        Position = UDim2.new(0.24, 0, 0, 0),
-        BackgroundColor3 = Color3.fromRGB(13, 89, 119),
-        BorderColor3 = Color3.fromRGB(13, 89, 119),
-        CanvasSize = UDim2.new(0, 0, 1, #self.state.lobbies * 50),
-        ScrollBarThickness = 10
-    }, self:renderLobbyItems(), {React.createElement("UIPadding", {
-        PaddingTop = UDim.new(0.05, 0)
-    })}, {
-        AddButton = React.createElement("TextButton", {
-            Text = "Add Lobby Item",
-            Size = UDim2.new(0.2, 0, 0.05, 0),
-            Position = UDim2.new(0.4, 0, 0.85, 0),
+function LobbyList:createLobby()
+    self:setState({isCreatingLobby = true})
+end
+
+function LobbyList:createLobbyFromInput(text, player)
+    local LobbyData = {name = text, host = player, playersData = {player}}
+    LobbyEvent:FireServer("createLobby", LobbyData)
+    table.insert(self.state.lobbies, LobbyData)
+        
+    self:setState({
+        isCreatingLobby = false,
+        isInLobby = true,
+        currentLobby = LobbyData
+    })
+end
+
+function LobbyList:renderIsInLobbyUI()
+    local isHost = false
+    if self.state.currentLobby.host == game.Players.LocalPlayer then
+        isHost = true
+    end
+
+    return React.createElement("Frame", {
+        Size = UDim2.new(1, 0, 1.1, 0),
+        Position = UDim2.new(0, 0, -0.1, 0),
+        BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+    }, {
+        React.createElement("TextLabel", {
+            Text = "In Lobby: " .. self.state.currentLobby.name,
+            Size = UDim2.new(1, 0, 0.1, 0),
+            BackgroundColor3 = Color3.fromRGB(150, 150, 150),
+            TextScaled = true,
+            FontFace = Font.fromEnum(Enum.Font.SourceSansBold)
+        }), React.createElement("Frame", {
+            Size = UDim2.new(1, 0, 0.7, 0),
+            Position = UDim2.new(0, 0, 0.1, 0),
+            BackgroundColor3 = Color3.fromRGB(150, 150, 150),
+            BorderSizePixel = 0
+        }, self:renderInLobbyItems()),
+        React.createElement("TextButton", {
+            Text = "Back to Lobby List",
+            Size = UDim2.new(0.2, 0, 0.1, 0),
+            Position = UDim2.new(0.1, 0, 0.8, 0),
             BackgroundColor3 = Color3.fromRGB(100, 200, 100),
             TextScaled = true,
-            [React.Event.Activated] = self.addLobbyItem
+            [React.Event.Activated] = function()
+                self:backToLobbyList(game.Players.LocalPlayer)
+            end
+        }), isHost and React.createElement("TextButton", {
+            Text = "Start Game",
+            Size = UDim2.new(0.2, 0, 0.1, 0),
+            Position = UDim2.new(0.7, 0, 0.8, 0),
+            BackgroundColor3 = Color3.fromRGB(200, 100, 100),
+            TextScaled = true,
+            [React.Event.Activated] = function()
+                print("start!")
+            end
+        }) or nil
+    })
+end
+function LobbyList:backToLobbyList(player)
+    for index, lobby in self.state.lobbies do
+        if lobby.name == self.state.currentLobby then
+            if lobby.host == player then
+                table.remove(self.state.lobbies, index)
+                LobbyEvent:FireServer("deleteLobby", lobby)
+            else
+                LobbyEvent:FireServer("leftLobby", lobby)
+            end
+        end
+    end
+
+    self:setState({
+        isCreatingLobby = false,
+        isInLobby = false,
+        currentLobby = "None"
+    })
+end
+
+function LobbyList:renderCreateLobbyUI()
+    return React.createElement("Frame", {
+        Size = UDim2.new(1, 0, 1.1, 0),
+        Position = UDim2.new(0, 0, -0.1, 0),
+        BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    }, {
+        Title = React.createElement("TextLabel", {
+            Text = "Create a New Lobby",
+            Size = UDim2.new(1, 0, 0.1, 0),
+            BackgroundColor3 = Color3.fromRGB(150, 150, 150),
+            TextScaled = true
+        }),
+        InputBox = React.createElement("TextBox", {
+            PlaceholderText = "Enter Lobby Name",
+            Size = UDim2.new(0.5, 0, 0.1, 0),
+            Position = UDim2.new(0.25, 0, 0.3, 0),
+            TextScaled = true,
+            [React.Event.FocusLost] = function(rbx, enterPressed)
+                if enterPressed then
+                    local player = game.Players.LocalPlayer
+                    self:createLobbyFromInput(rbx.Text, player)
+                end
+            end
+        }),
+        BackButton = React.createElement("TextButton", {
+            Text = "Back to Lobby List",
+            Size = UDim2.new(0.2, 0, 0.1, 0),
+            Position = UDim2.new(0.1, 0, 0.7, 0),
+            BackgroundColor3 = Color3.fromRGB(100, 200, 100),
+            TextScaled = true,
+            [React.Event.Activated] = function()
+                self:backToLobbyList()
+            end
         })
     })
 end
+
+function LobbyList:render()
+    if self.state.isCreatingLobby then
+        return self:renderCreateLobbyUI()
+    end
+    if self.state.isInLobby then
+        return self:renderIsInLobbyUI()
+    end
+
+    local totalLobbies = #self.state.lobbies
+    local canvasHeight = totalLobbies * 55
+
+    return React.createElement("Frame", {
+        Size = UDim2.new(1, 0, 1.1, 0),
+        BackgroundColor3 = Color3.fromHex("#080808"),
+        Position = UDim2.new(0, 0, -0.1, 0)
+
+    }, {
+        ScrollingFrame = React.createElement("ScrollingFrame", {
+            Size = UDim2.new(0.5, 0, 0.95, 0),
+            Position = UDim2.new(0.7, 0, 0.05, 0),
+            AnchorPoint = Vector2.new(0.7, 0),
+            CanvasSize = UDim2.new(0, 0, 0, canvasHeight),
+            BackgroundColor3 = Color3.fromHex("#080808"),
+            BorderSizePixel = 0,
+            ScrollBarThickness = 10,
+            BackgroundTransparency = 0.5
+        }, self:renderLobbyItems(), {
+            React.createElement("UIPadding", {PaddingTop = UDim.new(0, 10)})
+        }),
+        AddButton = React.createElement("TextButton", {
+            Text = "Create Lobby",
+            Size = UDim2.new(0.2, 0, 0.05, 0),
+            Position = UDim2.new(0.03, 0, 0.3, 0),
+            AnchorPoint = Vector2.new(0, 0),
+            BackgroundColor3 = Color3.fromRGB(100, 200, 100),
+            TextScaled = true,
+            [React.Event.Activated] = function()
+                self:createLobby()
+            end
+        })
+    })
+end
+
 
 function LobbyList:renderLobbyItems()
     local lobbyComponents = {}
@@ -54,20 +187,56 @@ function LobbyList:renderLobbyItems()
             Size = UDim2.new(0.8, 0, 0, 40),
             Position = UDim2.new(0.5, 0, 0, (index - 1) * 55),
             AnchorPoint = Vector2.new(0.5, 0),
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BackgroundColor3 = Color3.fromHex("080808"),
+            BorderColor3 = Color3.fromHex("FFFFFF"),
             BorderSizePixel = 2
         }, {
-            LobbyName = React.createElement("TextLabel", {
+            LobbyName = React.createElement("TextButton", {
                 Text = lobby.name .. " - Players: " .. lobby.players,
                 Size = UDim2.new(1, 0, 1, 0),
                 Position = UDim2.new(0, 5, 0, 0),
-                TextColor3 = Color3.fromRGB(0, 0, 0),
+                TextColor3 = Color3.fromHex("FFFFFF"),
                 TextScaled = true,
                 BackgroundTransparency = 1,
+                FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
+                [React.Event.Activated] = function()
+                    LobbyEvent:FireServer("joinLobby", lobby)
+                    self:setState({isInLobby = true, currentLobby = lobby})
+                end
             })
         }))
     end
     return lobbyComponents
+end
+
+function LobbyList:renderInLobbyItems()
+    local inLobbyComponents = {}
+    for _, lobby in self.state.lobbies do
+        if lobby.name == self.state.currentLobby.name then
+            for index, player in lobby.playersData do
+                table.insert(inLobbyComponents, React.createElement("Frame", {
+                    Size = UDim2.new(0.8, 0, 0, 40),
+                    Position = UDim2.new(0.5, 0, 0, (index - 1) * 55),
+                    AnchorPoint = Vector2.new(0.5, 0),
+                    BackgroundColor3 = Color3.fromHex("080808"),
+                    BorderColor3 = Color3.fromHex("FFFFFF"),
+                    BorderSizePixel = 2
+                }, {
+                    LobbyName = React.createElement("TextButton", {
+                        Text = player.Name,
+                        Size = UDim2.new(1, 0, 1, 0),
+                        Position = UDim2.new(0, 5, 0, 0),
+                        TextColor3 = Color3.fromHex("FFFFFF"),
+                        TextScaled = true,
+                        BackgroundTransparency = 1,
+                        FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
+                    })
+                }))
+            end
+            break
+        end
+    end
+    return inLobbyComponents
 end
 
 return LobbyList
