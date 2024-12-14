@@ -5,9 +5,9 @@ local PlayerLoaded = ReplicatedStorage.Shared.Remote_Events.PlayerLoaded
 local RespawnPlayer = ReplicatedStorage.Shared.Remote_Events.RespawnPlayer
 
 player.CharacterAdded:Connect(function(character)
-    local humanoid = character:WaitForChild("Humanoid") -- Wait for Humanoid to exist
+    local humanoid = character:WaitForChild("Humanoid")
     humanoid.Died:Connect(function()
-        task.wait(2) -- Delay before respawn
+        task.wait(2)
         RespawnPlayer:FireServer()
     end)
 end)
