@@ -1,12 +1,21 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LobbyEvent = ReplicatedStorage.Shared.Remote_Events.LobbyEvent
 local lobbies = {
-    {name = "Fried Chicken", players = 5},
-    {name = "Wow!", players = 3},
-    {name = "TMFG", players = 10},
+    {name = "The Interesting Game", players = 5},
+    {name = "Randomly Named Lobby", players = 3},
+    {name = "Lobby 3", players = 10},
     {name = "Test.Exe", players = 7}
 }
 local activePlayers = {}
+
+local function findLobbyByName(lobbyName)
+    for index, lobby in ipairs(lobbies) do
+        if lobby.name == lobbyName then
+            return index, lobby
+        end
+    end
+    return nil, nil
+end
 
 local function updateClientLobbies(action)
     for _, player in activePlayers do
@@ -14,12 +23,12 @@ local function updateClientLobbies(action)
     end
 end
 
-local function initializeClientLobbies(player, action, lobbyData)
-    if action == "joined" then
+local lobbyActions = {
+    joined = function(player, _lobbyData)
         table.insert(activePlayers, player)
         LobbyEvent:FireClient(player, lobbies)
-    end
-    if action == "createLobby" then
+    end,
+    createLobby = function(player, lobbyData)
         local newLobby = {
             name = lobbyData.name,
             host = player,
@@ -28,41 +37,42 @@ local function initializeClientLobbies(player, action, lobbyData)
         }
         table.insert(lobbies, newLobby)
         updateClientLobbies()
-    end
-    if action == "deleteLobby" then
-        for i, lobby in lobbies do
-            if lobby.name == lobbyData.name then
-                table.remove(lobbies, i)
-                break 
-            end
+    end,
+    deleteLobby = function(_player, lobbyData)
+        local index = findLobbyByName(lobbyData.name)
+        if index then
+            table.remove(lobbies, index)
+            updateClientLobbies("lobbyDeleted")
         end
-        updateClientLobbies("lobbyDeleted")
-    end
-    if action == "leftLobby" then
-        for i, lobby in lobbies do
-            if lobby.name == lobbyData.name then
-                lobbies[i].players -= 1
-                local currentLobby = lobbies[i].playersData
-                for index, playerName in currentLobby do
-                    if playerName == player then
-                        table.remove(currentLobby, index)
-                        updateClientLobbies()
-                        break
-                    end
-                end
-            break 
-            end
+    end,
+    leftLobby = function(player, lobbyData)
+        local _, lobby = findLobbyByName(lobbyData.name)
+        if lobby then
+            lobby.players -= 1
         end
-    end
-    if action == "joinLobby" then
-        for i, lobby in lobbies do
-            if lobby.name == lobbyData.name then
-                lobbies[i].players += 1
-                table.insert(lobbies[i].playersData, player)
+        for index, playerName in lobby.playersData do
+            if playerName == player then
+                table.remove(lobby.playersData, index)
                 updateClientLobbies()
-                break
+            return
             end
         end
+    end,
+    joinLobby = function(player, lobbyData)
+        local _, lobby = findLobbyByName(lobbyData.name)
+        if lobby then
+            lobby.players += 1
+            table.insert(lobby.playersData, player)
+            updateClientLobbies()
+        end
+    end
+}
+
+local function initializeClientLobbies(player, action, lobbyData)
+    
+    local actionFunction = lobbyActions[action]
+    if actionFunction then
+        actionFunction(player, lobbyData)
     end
 end
 

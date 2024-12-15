@@ -70,30 +70,35 @@ function LobbyList:renderIsInLobbyUI()
     return React.createElement("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
         Position = UDim2.new(0, 0, 0, 0),
-        BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+        BackgroundColor3 = Color3.fromHex("#344E41")
     }, {
         React.createElement("TextLabel", {
             Text = "In Lobby: " .. self.state.currentLobby.name,
-            Size = UDim2.new(1, 0, 0.1, 0),
-            BackgroundColor3 = Color3.fromRGB(150, 150, 150),
+            Size = UDim2.new(1, 0, 0.2, 0),
+            TextColor3 = Color3.fromHex("#DAD7CD"),
+            BackgroundColor3 = Color3.fromHex("#344E41"),
             TextScaled = true,
             FontFace = Font.fromEnum(Enum.Font.SourceSansBold)
-        }), React.createElement("Frame", {
+        }, {React.createElement("UIPadding", {PaddingBottom = UDim.new(0, 30)})}), React.createElement("Frame", {
             Size = UDim2.new(1, 0, 0.7, 0),
-            Position = UDim2.new(0, 0, 0.1, 0),
-            BackgroundColor3 = Color3.fromRGB(150, 150, 150),
+            Position = UDim2.new(0, 0, 0.2, 0),
+            BackgroundColor3 = Color3.fromHex("#344E41"),
             BorderSizePixel = 0
         }, self:renderInLobbyItems()),
         React.createElement("TextButton", {
             Text = "Back to Lobby List",
+            TextColor3 = Color3.fromHex("#344E41"),
             Size = UDim2.new(0.2, 0, 0.1, 0),
             Position = UDim2.new(0.1, 0, 0.8, 0),
-            BackgroundColor3 = Color3.fromRGB(100, 200, 100),
+            BackgroundColor3 = Color3.fromHex("#DAD7CD"),
             TextScaled = true,
+            FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
             [React.Event.Activated] = function()
                 self:backToLobbyList(game.Players.LocalPlayer)
             end
-        }), isHost and React.createElement("TextButton", {
+        }, {React.createElement("UICorner", {CornerRadius = UDim.new(0, 20)}), React.createElement("UIPadding", {
+            PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10), PaddingLeft = UDim.new(0, 20), PaddingRight = UDim.new(0, 20)
+        })}), isHost and React.createElement("TextButton", {
             Text = "Start Game",
             Size = UDim2.new(0.2, 0, 0.1, 0),
             Position = UDim2.new(0.7, 0, 0.8, 0),
@@ -238,24 +243,45 @@ function LobbyList:renderInLobbyItems()
     for _, lobby in self.state.lobbies do
         if lobby.name == self.state.currentLobby.name then
             for index, player in lobby.playersData do
-                table.insert(inLobbyComponents, React.createElement("Frame", {
-                    Size = UDim2.new(0.8, 0, 0, 40),
-                    Position = UDim2.new(0.5, 0, 0, (index - 1) * 55),
-                    AnchorPoint = Vector2.new(0.5, 0),
-                    BackgroundColor3 = Color3.fromHex("080808"),
-                    BorderColor3 = Color3.fromHex("FFFFFF"),
-                    BorderSizePixel = 2
-                }, {
-                    LobbyName = React.createElement("TextButton", {
-                        Text = player.Name,
-                        Size = UDim2.new(1, 0, 1, 0),
-                        Position = UDim2.new(0, 5, 0, 0),
-                        TextColor3 = Color3.fromHex("FFFFFF"),
-                        TextScaled = true,
-                        BackgroundTransparency = 1,
-                        FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
-                    })
-                }))
+                if lobby.host == player then
+                    table.insert(inLobbyComponents, React.createElement("Frame", {
+                        Size = UDim2.new(0.8, 0, 0, 40),
+                        Position = UDim2.new(0.5, 0, 0, (index - 1) * 55),
+                        AnchorPoint = Vector2.new(0.5, 0),
+                        BackgroundColor3 = Color3.fromHex("DAD7CD"),
+                        BorderColor3 = Color3.fromHex("A3B18A"),
+                        BorderSizePixel = 2
+                    }, {
+                        LobbyName = React.createElement("TextButton", {
+                            Text = `Host: {player.Name}`,
+                            Size = UDim2.new(1, 0, 1, 0),
+                            Position = UDim2.new(0, 5, 0, 0),
+                            TextColor3 = Color3.fromHex("#3b3d16"),
+                            TextScaled = true,
+                            BackgroundTransparency = 1,
+                            FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
+                        })
+                    }))
+                else
+                    table.insert(inLobbyComponents, React.createElement("Frame", {
+                        Size = UDim2.new(0.8, 0, 0, 40),
+                        Position = UDim2.new(0.5, 0, 0, (index - 1) * 55),
+                        AnchorPoint = Vector2.new(0.5, 0),
+                        BackgroundColor3 = Color3.fromHex("DAD7CD"),
+                        BorderColor3 = Color3.fromHex("A3B18A"),
+                        BorderSizePixel = 2
+                    }, {
+                        LobbyName = React.createElement("TextButton", {
+                            Text = player.Name,
+                            Size = UDim2.new(1, 0, 1, 0),
+                            Position = UDim2.new(0, 5, 0, 0),
+                            TextColor3 = Color3.fromHex("344E41"),
+                            TextScaled = true,
+                            BackgroundTransparency = 1,
+                            FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
+                        })
+                    }))
+                end
             end
             break
         end
