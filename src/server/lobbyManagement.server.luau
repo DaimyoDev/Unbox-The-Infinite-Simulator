@@ -3,9 +3,9 @@ local LobbyEvent = ReplicatedStorage.Shared.Remote_Events.LobbyEvent
 local lobbies = {}
 local activePlayers = {}
 
-local function updateClientLobbies()
+local function updateClientLobbies(action)
     for _, player in activePlayers do
-        LobbyEvent:FireClient(player, lobbies)
+        LobbyEvent:FireClient(player, lobbies, action)
     end
 end
 
@@ -31,7 +31,7 @@ local function initializeClientLobbies(player, action, lobbyData)
                 break 
             end
         end
-        updateClientLobbies()
+        updateClientLobbies("lobbyDeleted")
     end
     if action == "leftLobby" then
         for i, lobby in lobbies do

@@ -13,8 +13,15 @@ function LobbyList:init()
         currentLobby = {}
     }
 
-    LobbyEvent.OnClientEvent:Connect(function(Newlobbies) 
+    LobbyEvent.OnClientEvent:Connect(function(Newlobbies, action) 
         self:setState({lobbies = Newlobbies})
+        if action == "lobbyDeleted" then
+            self:setState({
+                isCreatingLobby = false,
+                isInLobby = false,
+                currentLobby = "None"
+            })
+        end
     end)
 
 end
@@ -81,7 +88,7 @@ function LobbyList:renderIsInLobbyUI()
 end
 function LobbyList:backToLobbyList(player)
     for index, lobby in self.state.lobbies do
-        if lobby.name == self.state.currentLobby then
+        if lobby.name == self.state.currentLobby.name then
             if lobby.host == player then
                 table.remove(self.state.lobbies, index)
                 LobbyEvent:FireServer("deleteLobby", lobby)
