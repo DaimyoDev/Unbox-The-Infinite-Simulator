@@ -1,6 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LobbyEvent = ReplicatedStorage.Shared.Remote_Events.LobbyEvent
-local lobbies = {}
+local lobbies = {
+    {name = "Fried Chicken", players = 5},
+    {name = "Wow!", players = 3},
+    {name = "TMFG", players = 10},
+    {name = "Test.Exe", players = 7}
+}
 local activePlayers = {}
 
 local function updateClientLobbies(action)

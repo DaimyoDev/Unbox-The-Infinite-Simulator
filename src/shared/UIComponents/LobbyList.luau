@@ -42,6 +42,25 @@ function LobbyList:createLobbyFromInput(text, player)
     })
 end
 
+function LobbyList:backToLobbyList(player)
+    for index, lobby in self.state.lobbies do
+        if lobby.name == self.state.currentLobby.name then
+            if lobby.host == player then
+                table.remove(self.state.lobbies, index)
+                LobbyEvent:FireServer("deleteLobby", lobby)
+            else
+                LobbyEvent:FireServer("leftLobby", lobby)
+            end
+        end
+    end
+
+    self:setState({
+        isCreatingLobby = false,
+        isInLobby = false,
+        currentLobby = "None"
+    })
+end
+
 function LobbyList:renderIsInLobbyUI()
     local isHost = false
     if self.state.currentLobby.host == game.Players.LocalPlayer then
@@ -49,8 +68,8 @@ function LobbyList:renderIsInLobbyUI()
     end
 
     return React.createElement("Frame", {
-        Size = UDim2.new(1, 0, 1.1, 0),
-        Position = UDim2.new(0, 0, -0.1, 0),
+        Size = UDim2.new(1, 0, 1, 0),
+        Position = UDim2.new(0, 0, 0, 0),
         BackgroundColor3 = Color3.fromRGB(150, 150, 150)
     }, {
         React.createElement("TextLabel", {
@@ -84,24 +103,6 @@ function LobbyList:renderIsInLobbyUI()
                 print("start!")
             end
         }) or nil
-    })
-end
-function LobbyList:backToLobbyList(player)
-    for index, lobby in self.state.lobbies do
-        if lobby.name == self.state.currentLobby.name then
-            if lobby.host == player then
-                table.remove(self.state.lobbies, index)
-                LobbyEvent:FireServer("deleteLobby", lobby)
-            else
-                LobbyEvent:FireServer("leftLobby", lobby)
-            end
-        end
-    end
-
-    self:setState({
-        isCreatingLobby = false,
-        isInLobby = false,
-        currentLobby = "None"
     })
 end
 
@@ -154,34 +155,41 @@ function LobbyList:render()
     local canvasHeight = totalLobbies * 55
 
     return React.createElement("Frame", {
-        Size = UDim2.new(1, 0, 1.1, 0),
-        BackgroundColor3 = Color3.fromHex("#080808"),
-        Position = UDim2.new(0, 0, -0.1, 0)
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundColor3 = Color3.fromHex("#344E41"),
+        Position = UDim2.new(0, 0, 0, 0)
 
     }, {
         ScrollingFrame = React.createElement("ScrollingFrame", {
-            Size = UDim2.new(0.5, 0, 0.95, 0),
-            Position = UDim2.new(0.7, 0, 0.05, 0),
-            AnchorPoint = Vector2.new(0.7, 0),
+            Size = UDim2.new(0.9, 0, 0.8, 0),
+            Position = UDim2.new(0.5, 0, 0.17, 0),
+            AnchorPoint = Vector2.new(0.5, 0),
             CanvasSize = UDim2.new(0, 0, 0, canvasHeight),
             BackgroundColor3 = Color3.fromHex("#080808"),
             BorderSizePixel = 0,
             ScrollBarThickness = 10,
-            BackgroundTransparency = 0.5
+            BackgroundTransparency = 1
         }, self:renderLobbyItems(), {
-            React.createElement("UIPadding", {PaddingTop = UDim.new(0, 10)})
+            React.createElement("UIPadding", {PaddingTop = UDim.new(0, 10)}), React.createElement("UIGridLayout", {
+                HorizontalAlignment = "Center",
+                VerticalAlignment = "Center",
+                CellSize = UDim2.new(0, 600, 0, 150),
+                CellPadding = UDim2.new(0, 30, 0, 30)
+            })
         }),
         AddButton = React.createElement("TextButton", {
             Text = "Create Lobby",
-            Size = UDim2.new(0.2, 0, 0.05, 0),
-            Position = UDim2.new(0.03, 0, 0.3, 0),
+            TextColor3 = Color3.fromHex("#3A5A40"),
+            FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
+            Size = UDim2.new(0.2, 0, 0.1, 0),
+            Position = UDim2.new(0.4, 0, 0.1, 0),
             AnchorPoint = Vector2.new(0, 0),
-            BackgroundColor3 = Color3.fromRGB(100, 200, 100),
+            BackgroundColor3 = Color3.fromHex("#DAD7CD"),
             TextScaled = true,
             [React.Event.Activated] = function()
                 self:createLobby()
             end
-        })
+        }, {React.createElement("UICorner", {CornerRadius = UDim.new(0, 20)}), React.createElement("UIPadding", {PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10), PaddingLeft = UDim.new(0, 20), PaddingRight = UDim.new(0, 20)})})
     })
 end
 
@@ -194,22 +202,31 @@ function LobbyList:renderLobbyItems()
             Size = UDim2.new(0.8, 0, 0, 40),
             Position = UDim2.new(0.5, 0, 0, (index - 1) * 55),
             AnchorPoint = Vector2.new(0.5, 0),
-            BackgroundColor3 = Color3.fromHex("080808"),
-            BorderColor3 = Color3.fromHex("FFFFFF"),
+            BackgroundColor3 = Color3.fromHex("#DAD7CD"),
+            BorderColor3 = Color3.fromHex("#3A5A40"),
             BorderSizePixel = 2
         }, {
             LobbyName = React.createElement("TextButton", {
-                Text = lobby.name .. " - Players: " .. lobby.players,
+                Text = lobby.name .. " Players: " .. lobby.players,
+                BackgroundColor3 = Color3.fromHex("#DAD7CD"),
                 Size = UDim2.new(1, 0, 1, 0),
                 Position = UDim2.new(0, 5, 0, 0),
-                TextColor3 = Color3.fromHex("FFFFFF"),
-                TextScaled = true,
+                TextColor3 = Color3.fromHex("#3A5A40"),
+                TextScaled = false,
+                TextSize = 40,
                 BackgroundTransparency = 1,
                 FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
                 [React.Event.Activated] = function()
                     LobbyEvent:FireServer("joinLobby", lobby)
                     self:setState({isInLobby = true, currentLobby = lobby})
                 end
+            }), LobbyPadding = React.createElement("UIPadding", {
+                PaddingTop = UDim.new(0, 20),
+                PaddingBottom = UDim.new(0, 20),
+                PaddingLeft = UDim.new(0, 20),
+                PaddingRight = UDim.new(0, 20)
+            }), LobbyRoundCorners = React.createElement("UICorner", {
+                CornerRadius = UDim.new(0, 20)
             })
         }))
     end

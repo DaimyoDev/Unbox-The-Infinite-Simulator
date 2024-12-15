@@ -10,8 +10,8 @@ end
 function client_helpers:loadMainMenu(React, PlayButtonClicked, root)
     local function MainMenu()
         return React.createElement("Frame", {
-            Size = UDim2.new(1,0,1.1,0),
-            Position = UDim2.new(0, 0, -0.1, 0),
+            Size = UDim2.new(1,0,1,0),
+            Position = UDim2.new(0, 0, 0, 0),
             BackgroundColor3 = Color3.fromRGB(18, 121, 161)
         }, {
             React.createElement("TextButton", {

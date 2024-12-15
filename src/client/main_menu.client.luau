@@ -7,6 +7,7 @@ local StarterGui = game:GetService("StarterGui")
 local PlayerGui = Players.PlayerGui
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
 local handle = Instance.new("ScreenGui")
+handle.IgnoreGuiInset = true
 handle.Parent = PlayerGui
 local root = ReactRoblox.createRoot(handle)
 local Client_Helpers = require(game.ReplicatedStorage.Shared.client_helpers)
