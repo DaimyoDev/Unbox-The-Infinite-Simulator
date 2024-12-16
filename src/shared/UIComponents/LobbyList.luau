@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local React = require(ReplicatedStorage.Shared.Packages.react)
 local LobbyEvent = ReplicatedStorage.Shared.Remote_Events.LobbyEvent
+local UITheme = require(ReplicatedStorage.Shared.UIComponents.UITheme)
 
 
 local LobbyList = React.Component:extend("LobbyList")
@@ -70,24 +71,28 @@ function LobbyList:renderIsInLobbyUI()
     return React.createElement("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
         Position = UDim2.new(0, 0, 0, 0),
-        BackgroundColor3 = Color3.fromHex("#344E41")
+        BackgroundColor3 = UITheme.GreenTheme.BackgroundColor1
     }, {
         React.createElement("TextLabel", {
             Text = "In Lobby: " .. self.state.currentLobby.name,
             Size = UDim2.new(1, 0, 0.2, 0),
-            TextColor3 = Color3.fromHex("#DAD7CD"),
-            BackgroundColor3 = Color3.fromHex("#344E41"),
+            TextColor3 = UITheme.GreenTheme.BackgroundTextColor,
+            BackgroundColor3 = UITheme.GreenTheme.BackgroundColor1,
             TextScaled = true,
             FontFace = Font.fromEnum(Enum.Font.SourceSansBold)
-        }, {React.createElement("UIPadding", {PaddingBottom = UDim.new(0, 30)})}), React.createElement("Frame", {
+        }, {
+            React.createElement("UIPadding", {
+            PaddingBottom = UDim.new(0, 30)
+        })
+        }), React.createElement("Frame", {
             Size = UDim2.new(1, 0, 0.7, 0),
             Position = UDim2.new(0, 0, 0.2, 0),
-            BackgroundColor3 = Color3.fromHex("#344E41"),
+            BackgroundColor3 = UITheme.GreenTheme.BackgroundColor1,
             BorderSizePixel = 0
         }, self:renderInLobbyItems()),
         React.createElement("TextButton", {
             Text = "Back to Lobby List",
-            TextColor3 = Color3.fromHex("#344E41"),
+            TextColor3 = UITheme.GreenTheme.TextColor,
             Size = UDim2.new(0.2, 0, 0.1, 0),
             Position = UDim2.new(0.1, 0, 0.8, 0),
             BackgroundColor3 = Color3.fromHex("#DAD7CD"),
@@ -96,37 +101,58 @@ function LobbyList:renderIsInLobbyUI()
             [React.Event.Activated] = function()
                 self:backToLobbyList(game.Players.LocalPlayer)
             end
-        }, {React.createElement("UICorner", {CornerRadius = UDim.new(0, 20)}), React.createElement("UIPadding", {
-            PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10), PaddingLeft = UDim.new(0, 20), PaddingRight = UDim.new(0, 20)
+        }, {React.createElement("UICorner", {CornerRadius = UDim.new(0, 20)}), 
+        React.createElement("UIPadding", {
+            PaddingTop = UDim.new(0, 10), 
+            PaddingBottom = UDim.new(0, 10), 
+            PaddingLeft = UDim.new(0, 20), 
+            PaddingRight = UDim.new(0, 20)
         })}), isHost and React.createElement("TextButton", {
             Text = "Start Game",
+            TextColor3 = UITheme.GreenTheme.TextColor,
             Size = UDim2.new(0.2, 0, 0.1, 0),
             Position = UDim2.new(0.7, 0, 0.8, 0),
-            BackgroundColor3 = Color3.fromRGB(200, 100, 100),
+            BackgroundColor3 = Color3.fromHex("#A3B18A"),
             TextScaled = true,
+            FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
             [React.Event.Activated] = function()
                 print("start!")
             end
-        }) or nil
+        }, {React.createElement("UICorner", {CornerRadius = UDim.new(0, 20)}), 
+        React.createElement("UIPadding", {
+            PaddingTop = UDim.new(0, 10), 
+            PaddingBottom = UDim.new(0, 10), 
+            PaddingLeft = UDim.new(0, 20), 
+            PaddingRight = UDim.new(0, 20)
+        })}) or nil
     })
 end
 
 function LobbyList:renderCreateLobbyUI()
     return React.createElement("Frame", {
-        Size = UDim2.new(1, 0, 1.1, 0),
-        Position = UDim2.new(0, 0, -0.1, 0),
-        BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        Size = UDim2.new(1, 0, 1, 0),
+        Position = UDim2.new(0, 0, 0, 0),
+        BackgroundColor3 = UITheme.GreenTheme.BackgroundColor1,
+        BorderSizePixel = 0,
     }, {
         Title = React.createElement("TextLabel", {
             Text = "Create a New Lobby",
+            TextColor3 = UITheme.GreenTheme.BackgroundTextColor,
             Size = UDim2.new(1, 0, 0.1, 0),
-            BackgroundColor3 = Color3.fromRGB(150, 150, 150),
+            BackgroundColor3 = UITheme.GreenTheme.BackgroundColor1,
+            FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
+            BorderSizePixel = 0,
             TextScaled = true
         }),
         InputBox = React.createElement("TextBox", {
             PlaceholderText = "Enter Lobby Name",
+            PlaceholderColor3 = UITheme.GreenTheme.BackgroundTextColor,
             Size = UDim2.new(0.5, 0, 0.1, 0),
             Position = UDim2.new(0.25, 0, 0.3, 0),
+            TextColor3 = UITheme.GreenTheme.BackgroundTextColor,
+            BorderSizePixel = 0,
+            FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
+            BackgroundColor3 = Color3.fromHex("#3A5A40"),
             TextScaled = true,
             [React.Event.FocusLost] = function(rbx, enterPressed)
                 if enterPressed then
@@ -134,16 +160,49 @@ function LobbyList:renderCreateLobbyUI()
                     self:createLobbyFromInput(rbx.Text, player)
                 end
             end
+        }, {
+            React.createElement("UIPadding", {
+                PaddingTop = UDim.new(0, 10),
+                PaddingBottom = UDim.new(0, 10),
+                PaddingLeft = UDim.new(0, 20),
+                PaddingRight = UDim.new(0, 20)
+            }),
+            React.createElement("UICorner", {
+                CornerRadius = UDim.new(0, 20)
+            })
         }),
         BackButton = React.createElement("TextButton", {
             Text = "Back to Lobby List",
+            TextColor3 = UITheme.GreenTheme.TextColor,
             Size = UDim2.new(0.2, 0, 0.1, 0),
             Position = UDim2.new(0.1, 0, 0.7, 0),
-            BackgroundColor3 = Color3.fromRGB(100, 200, 100),
+            BackgroundColor3 = UITheme.GreenTheme.BackgroundColor2,
+            FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
             TextScaled = true,
+            BorderSizePixel = 0,
             [React.Event.Activated] = function()
                 self:backToLobbyList()
             end
+        }, {
+            React.createElement("UIPadding", {
+                PaddingBottom = UDim.new(0, 10),
+                PaddingTop = UDim.new(0, 10),
+                PaddingLeft = UDim.new(0, 20),
+                PaddingRight = UDim.new(0, 20)
+            }),
+            React.createElement("UICorner", {
+                CornerRadius = UDim.new(0, 20)
+            })
+        }), CreateLobbyText = React.createElement("TextLabel", {
+            Text = "Press Enter To Create The Lobby",
+            TextColor3 = UITheme.GreenTheme.TextColor,
+            Size = UDim2.new(0.2, 0, 0.1, 0),
+            Position = UDim2.new(0.4, 0, 0.17, 0),
+            BackgroundColor3 = UITheme.GreenTheme.BackgroundColor2,
+            FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
+            TextScaled = true,
+            BorderSizePixel = 0
+            
         })
     })
 end
@@ -161,7 +220,7 @@ function LobbyList:render()
 
     return React.createElement("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromHex("#344E41"),
+        BackgroundColor3 = UITheme.GreenTheme.BackgroundColor1,
         Position = UDim2.new(0, 0, 0, 0)
 
     }, {
@@ -189,12 +248,21 @@ function LobbyList:render()
             Size = UDim2.new(0.2, 0, 0.1, 0),
             Position = UDim2.new(0.4, 0, 0.1, 0),
             AnchorPoint = Vector2.new(0, 0),
-            BackgroundColor3 = Color3.fromHex("#DAD7CD"),
+            BackgroundColor3 = UITheme.GreenTheme.BackgroundColor2,
             TextScaled = true,
             [React.Event.Activated] = function()
                 self:createLobby()
             end
-        }, {React.createElement("UICorner", {CornerRadius = UDim.new(0, 20)}), React.createElement("UIPadding", {PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10), PaddingLeft = UDim.new(0, 20), PaddingRight = UDim.new(0, 20)})})
+        }, {
+            React.createElement("UICorner", 
+            {
+                CornerRadius = UDim.new(0, 20)
+            }), React.createElement("UIPadding", {
+                PaddingTop = UDim.new(0, 10), 
+                PaddingBottom = UDim.new(0, 10), 
+                PaddingLeft = UDim.new(0, 20), 
+                PaddingRight = UDim.new(0, 20)
+            })})
     })
 end
 
@@ -207,13 +275,13 @@ function LobbyList:renderLobbyItems()
             Size = UDim2.new(0.8, 0, 0, 40),
             Position = UDim2.new(0.5, 0, 0, (index - 1) * 55),
             AnchorPoint = Vector2.new(0.5, 0),
-            BackgroundColor3 = Color3.fromHex("#DAD7CD"),
+            BackgroundColor3 = UITheme.GreenTheme.BackgroundColor2,
             BorderColor3 = Color3.fromHex("#3A5A40"),
             BorderSizePixel = 2
         }, {
             LobbyName = React.createElement("TextButton", {
                 Text = lobby.name .. " Players: " .. lobby.players,
-                BackgroundColor3 = Color3.fromHex("#DAD7CD"),
+                BackgroundColor3 = UITheme.GreenTheme.BackgroundColor2,
                 Size = UDim2.new(1, 0, 1, 0),
                 Position = UDim2.new(0, 5, 0, 0),
                 TextColor3 = Color3.fromHex("#3A5A40"),
@@ -248,15 +316,15 @@ function LobbyList:renderInLobbyItems()
                         Size = UDim2.new(0.8, 0, 0, 40),
                         Position = UDim2.new(0.5, 0, 0, (index - 1) * 55),
                         AnchorPoint = Vector2.new(0.5, 0),
-                        BackgroundColor3 = Color3.fromHex("DAD7CD"),
-                        BorderColor3 = Color3.fromHex("A3B18A"),
+                        BackgroundColor3 = UITheme.GreenTheme.BackgroundColor2,
+                        BorderColor3 = Color3.fromHex("#A3B18A"),
                         BorderSizePixel = 2
                     }, {
                         LobbyName = React.createElement("TextButton", {
                             Text = `Host: {player.Name}`,
                             Size = UDim2.new(1, 0, 1, 0),
                             Position = UDim2.new(0, 5, 0, 0),
-                            TextColor3 = Color3.fromHex("#3b3d16"),
+                            TextColor3 = Color3.fromHex("#c1121f"),
                             TextScaled = true,
                             BackgroundTransparency = 1,
                             FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
@@ -267,15 +335,15 @@ function LobbyList:renderInLobbyItems()
                         Size = UDim2.new(0.8, 0, 0, 40),
                         Position = UDim2.new(0.5, 0, 0, (index - 1) * 55),
                         AnchorPoint = Vector2.new(0.5, 0),
-                        BackgroundColor3 = Color3.fromHex("DAD7CD"),
-                        BorderColor3 = Color3.fromHex("A3B18A"),
+                        BackgroundColor3 = UITheme.GreenTheme.BackgroundColor2,
+                        BorderColor3 = Color3.fromHex("#A3B18A"),
                         BorderSizePixel = 2
                     }, {
                         LobbyName = React.createElement("TextButton", {
                             Text = player.Name,
                             Size = UDim2.new(1, 0, 1, 0),
                             Position = UDim2.new(0, 5, 0, 0),
-                            TextColor3 = Color3.fromHex("344E41"),
+                            TextColor3 = UITheme.GreenTheme.BackgroundColor1,
                             TextScaled = true,
                             BackgroundTransparency = 1,
                             FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
