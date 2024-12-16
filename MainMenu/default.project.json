@@ -1,24 +1,24 @@
 {
-  "name": "Unbox-The-Infinite-Simulator",
+  "name": "MainMenu",
   "tree": {
     "$className": "DataModel",
 
     "ReplicatedStorage": {
       "Shared": {
-        "$path": "src/shared"
+        "$path": "shared"
       }
     },
 
     "ServerScriptService": {
       "Server": {
-        "$path": "src/server"
+        "$path": "server"
       }
     },
 
     "StarterPlayer": {
       "StarterPlayerScripts": {
         "Client": {
-          "$path": "src/client"
+          "$path": "client"
         }
       }
     },

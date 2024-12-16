@@ -54,7 +54,7 @@ function LobbyList:createLobbyFromInput()
             host = game.Players.LocalPlayer,
             players = 1,
             playersData = {game.Players.LocalPlayer},
-            waves = 10,
+            waves = self.state.creatingLobbyData.waves,
             difficulty = 1,
             lives = 5
         }
@@ -188,7 +188,35 @@ function LobbyList:renderCreateLobbyUI()
                 CornerRadius = UDim.new(0, 20)
             })
         }),
-        --note
+        WavesInput = React.createElement("TextBox", {
+            Text = "How many waves? Press enter to set the amount",
+            PlaceholderText = "How many waves? Press enter to set the amount",
+            PlaceholderColor3 = UITheme.CurrentTheme.BackgroundTextColor,
+            Size = UDim2.new(0.5, 0, 0.1, 0),
+            Position = UDim2.new(0.25, 0, 0.5, 0),
+            TextColor3 = UITheme.CurrentTheme.BackgroundTextColor,
+            BorderSizePixel = 0,
+            FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
+            BackgroundColor3 = UITheme.CurrentTheme.BackgroundColor3,
+            TextScaled = true,
+            [React.Event.FocusLost] = function(rbx, enterPressed)
+                if enterPressed then
+                    if string.len(rbx.Text) > 0 then
+                        self:setState({
+                            creatingLobbyData = {
+                                name = self.state.creatingLobbyData.name,
+                                host = self.state.creatingLobbyData.host,
+                                players = self.state.creatingLobbyData.players,
+                                playersData = self.state.creatingLobbyData.playersData,
+                                waves = tonumber(rbx.Text),
+                                difficulty = self.state.creatingLobbyData.difficulty,
+                                lives = self.state.creatingLobbyData.lives
+                            }
+                        })
+                    end
+                end
+            end
+        }),
         BackButton = React.createElement(BasicTextButton, {
             Text = "Back to Lobby List",
             Position = UDim2.new(0.1, 0, 0.7, 0),
