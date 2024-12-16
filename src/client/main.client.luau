@@ -1,10 +1,10 @@
-local player = game:GetService("Players").LocalPlayer
+local Player = game:GetService("Players").LocalPlayer
 local Humanoid
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PlayerLoaded = ReplicatedStorage.Shared.Remote_Events.PlayerLoaded
 local RespawnPlayer = ReplicatedStorage.Shared.Remote_Events.RespawnPlayer
 
-player.CharacterAdded:Connect(function(character)
+Player.CharacterAdded:Connect(function(character)
     local humanoid = character:WaitForChild("Humanoid")
     humanoid.Died:Connect(function()
         task.wait(2)
@@ -13,7 +13,7 @@ player.CharacterAdded:Connect(function(character)
 end)
 
 PlayerLoaded.OnClientEvent:Connect(function()
-    Humanoid = player.Character.Humanoid
+    Humanoid = Player.Character.Humanoid
     Humanoid.Died:Connect(function()
         task.wait(2)
         RespawnPlayer:FireServer()

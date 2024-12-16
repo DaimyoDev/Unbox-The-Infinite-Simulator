@@ -18,6 +18,6 @@ UITheme.Themes = {
     }
 }
 
-UITheme.CurrentTheme = UITheme.Themes[1]
+UITheme.CurrentTheme = UITheme.Themes[2]
 
 return UITheme

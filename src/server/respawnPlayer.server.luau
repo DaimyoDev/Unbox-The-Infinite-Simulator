@@ -1,5 +1,5 @@
 local RespawnPlayer = game.ReplicatedStorage.Shared.Remote_Events.RespawnPlayer
-local Helpers = require(script.Parent.helpers)
+local Helpers = require(game.ReplicatedStorage.Shared.helpers)
 
 RespawnPlayer.OnServerEvent:Connect(function(player)
     task.wait(2)
