@@ -333,7 +333,7 @@ function LobbyList:renderInLobbyItems()
                             Text = `Host: {player.Name}`,
                             Size = UDim2.new(1, 0, 1, 0),
                             Position = UDim2.new(0, 5, 0, 0),
-                            TextColor3 = Color3.fromHex("#c1121f"),
+                            TextColor3 = UITheme.CurrentTheme.TextColor,
                             TextScaled = true,
                             BackgroundTransparency = 1,
                             FontFace = Font.fromEnum(Enum.Font.SourceSansBold),
@@ -344,7 +344,7 @@ function LobbyList:renderInLobbyItems()
                         Size = UDim2.new(0.8, 0, 0, 40),
                         Position = UDim2.new(0.5, 0, 0, (index - 1) * 55),
                         AnchorPoint = Vector2.new(0.5, 0),
-                        BackgroundColor3 = UITheme.CurrentTheme.BackgroundColor2,
+                        BackgroundColor3 = UITheme.CurrentTheme.BackgroundColor1,
                         BorderColor3 = UITheme.CurrentTheme.BackgroundColor3,
                         BorderSizePixel = 2
                     }, {
@@ -354,6 +354,7 @@ function LobbyList:renderInLobbyItems()
                             Position = UDim2.new(0, 5, 0, 0),
                             TextScaled = true,
                             BackgroundTransparency = 1,
+                            TextColor3 = UITheme.CurrentTheme.BackgroundTextColor,
                             FontFace = Font.fromEnum(Enum.Font.SourceSansBold)
                         })
                     }))
