@@ -1,10 +1,18 @@
-local helpers = {}
+local gameFunctions = {}
 
-function helpers:respawnPlayer(player)
-    player:LoadCharacter()
+function gameFunctions:doWeaponDamage(player, weapon, enemyHumanoid)
+	--later check if player has actual weapon to prevent exploiters
+	if weapon == "Test Gun" then
+		enemyHumanoid:TakeDamage(20)
+		print(`{player} did damage against {enemyHumanoid.Parent}`)
+	end
 end
 
-function helpers:setPlayerAppearance(player)
+function gameFunctions:doEnemyDamage(targetHumanoid, damage)
+    targetHumanoid:TakeDamage(damage)
+end
+
+function gameFunctions:setPlayerAppearance(player)
     local legColor = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
     local skinColor = Color3.fromRGB(245, 205, 48)
     player:LoadCharacter()
@@ -17,4 +25,4 @@ function helpers:setPlayerAppearance(player)
     skinColor = nil
 end
 
-return helpers
+return gameFunctions

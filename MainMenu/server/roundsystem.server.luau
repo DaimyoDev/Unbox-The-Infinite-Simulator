@@ -1,7 +1,4 @@
-local basicEnemyModel = game.ServerStorage["Enemy Noob"]
-local EnemyAIScript = game.ServerScriptService.Server.enemyai
 local PlayButtonClicked = game.ReplicatedStorage.Shared.Remote_Events.PlayButtonClicked
-local Helpers = require(game.ReplicatedStorage.Shared.helpers)
 local TeleportService = game:GetService("TeleportService")
 local RoundSettings = {
     waves = nil,

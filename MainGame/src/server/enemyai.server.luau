@@ -16,6 +16,7 @@ skinColor = nil
 Enemy.Humanoid.WalkSpeed = 30
 
 local PathFindingService = game:GetService("PathfindingService")
+task.wait(3)
 local Players = game:GetService("Players"):GetChildren()
 
 local function findClosestPlayer()
@@ -46,6 +47,9 @@ local function findClosestPlayer()
 end
 
 findClosestPlayer()
+if playerChosen == nil then
+    findClosestPlayer()
+end
 
 local function findNewPlayer()
     if playerChosen then
@@ -66,7 +70,7 @@ local reachedConnection
 local nextWaypointIndex
 local waypoints
 local cooldown = false
-local Client_Helpers = require(game.ReplicatedStorage.Shared.client_helpers)
+local GameFunctions = require(game.ReplicatedStorage.Shared.game_functions)
 
 local function chaseTarget(chosenPlayer)
 
@@ -81,7 +85,7 @@ local function chaseTarget(chosenPlayer)
     Enemy.HumanoidRootPart.Touched:Connect(function(otherPart)
     local character = otherPart.Parent:FindFirstChild("Humanoid")
         if character ~= nil and cooldown == false then
-            Client_Helpers.doDamage(character, character, 10)
+            GameFunctions.doEnemyDamage(character, character, 10)
             cooldown = true
         end
     end)
