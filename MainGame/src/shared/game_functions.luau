@@ -1,10 +1,9 @@
 local gameFunctions = {}
 
 function gameFunctions:doWeaponDamage(player, weapon, enemyHumanoid)
-	--later check if player has actual weapon to prevent exploiters
+	--later check if player has actual weapon to prevent exploiters and give them the kill. Have only the player who killed the enemy get the drop.
 	if weapon == "Test Gun" then
 		enemyHumanoid:TakeDamage(20)
-		print(`{player} did damage against {enemyHumanoid.Parent}`)
 	end
 end
 

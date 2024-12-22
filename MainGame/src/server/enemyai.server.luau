@@ -1,5 +1,6 @@
 local Enemy = script.Parent
 if not script.Parent:IsA("Model") then return end
+local EnemiesRemaining = game.ServerStorage.EnemiesRemaining
 
 local legColor = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
 local skinColor = Color3.fromRGB(245, 205, 48)
@@ -10,10 +11,14 @@ Enemy["Left Arm"].Color = skinColor
 Enemy["Right Arm"].Color = skinColor
 local playerChosen
 
+Enemy.Humanoid.Died:Connect(function()
+    EnemiesRemaining.Value -= 1
+end)
+
 legColor = nil
 skinColor = nil
 
-Enemy.Humanoid.WalkSpeed = 30
+Enemy.Humanoid.WalkSpeed = 15
 
 local PathFindingService = game:GetService("PathfindingService")
 task.wait(3)
@@ -118,7 +123,7 @@ local function chaseTarget(chosenPlayer)
     end
 end
 
-while true do
+while Enemy.Humanoid.Health > 0 do
     task.wait(0.1)
     if playerChosen then
         chaseTarget(playerChosen)
