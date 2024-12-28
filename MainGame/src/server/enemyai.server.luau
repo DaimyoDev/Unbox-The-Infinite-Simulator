@@ -64,7 +64,7 @@ AgentHeight = 1,
 AgentCanJump = true,
 AgentJumpHeight = 10,
 AgentCanClimb = true,
-WaypointSpacing = 1
+WaypointSpacing = 2
 }
 local path = PathFindingService:CreatePath(agentParams)
 local reachedConnection
@@ -72,33 +72,59 @@ local nextWaypointIndex = 1
 local waypoints
 local cooldown = false
 local GameFunctions = require(game.ReplicatedStorage.Shared.game_functions)
+local enemiesFolder = game.Workspace:FindFirstChild("Enemies")
+local lastPosition = nil
 
 local function chaseTarget(chosenPlayer)
 
     local playerPosition = chosenPlayer.Character.HumanoidRootPart.Position
-    local destination = playerPosition + (chosenPlayer.Character.HumanoidRootPart.AssemblyLinearVelocity) / 1.5
+    local destination = playerPosition + (chosenPlayer.Character.HumanoidRootPart.AssemblyLinearVelocity) / 3
 
+    local direction = (destination - Enemy.HumanoidRootPart.Position).Unit
+    local distance = (destination - Enemy.HumanoidRootPart.Position).Magnitude
+    local rayParams = RaycastParams.new()
 
-    local success = pcall(function()  
-        path:ComputeAsync(Enemy.HumanoidRootPart.Position, destination)
-    end)
-    if success and path.Status == Enum.PathStatus.Success then
+    local ignoreList = {chosenPlayer.Character}
+    for _, enemy in enemiesFolder:GetChildren() do
+        if enemy:IsA("Model") then
+            table.insert(ignoreList, enemy)
+        end
+    end
+
+    rayParams.FilterDescendantsInstances = ignoreList
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+
+    local raycastResult = workspace:Raycast(Enemy.HumanoidRootPart.Position, direction * distance, rayParams)
+
+    if raycastResult then
+        local currentPosition = playerChosen.Character.PrimaryPart.Position
+        if lastPosition and (currentPosition - lastPosition).Magnitude > 1 then
+            print("player moved and raycast")
+            local success = pcall(function()  
+                path:ComputeAsync(Enemy.HumanoidRootPart.Position, destination)
+            end)
+            if success and path.Status == Enum.PathStatus.Success then
         
-        waypoints = path:GetWaypoints()
-
-        if not reachedConnection then
-			reachedConnection = Enemy.Humanoid.MoveToFinished:Connect(function(reached)
-				if reached and nextWaypointIndex < #waypoints then
-					nextWaypointIndex += 1
-					Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
-                    if waypoints[nextWaypointIndex].Action == Enum.PathWaypointAction.Jump then
-                        Enemy.Humanoid.Jump = true
-                    end
-				end
-			end)
-		end
-        nextWaypointIndex = 2
-		Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
+                waypoints = path:GetWaypoints()
+        
+                if not reachedConnection then
+                    reachedConnection = Enemy.Humanoid.MoveToFinished:Connect(function(reached)
+                        if reached and nextWaypointIndex < #waypoints then
+                            nextWaypointIndex += 1
+                            Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
+                            if waypoints[nextWaypointIndex].Action == Enum.PathWaypointAction.Jump then
+                                Enemy.Humanoid.Jump = true
+                            end
+                        end
+                    end)
+                end
+                nextWaypointIndex = 2
+                Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
+            end
+        end
+        lastPosition = currentPosition
+    else
+        Enemy.Humanoid:MoveTo(destination)
     end
 end
 

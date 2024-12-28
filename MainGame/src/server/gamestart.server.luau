@@ -25,6 +25,9 @@ local startingEnemies = TestRoundData.startingEnemyCount
 local maxEnemies = 100
 local currentRound = 0
 local enemiesRemaining = 0
+local enemiesFolder = Instance.new("Folder")
+enemiesFolder.Parent = game.Workspace
+enemiesFolder.Name = "Enemies"
 
 local function getActiveMap()
     for _, child in Workspace:GetChildren() do
@@ -50,7 +53,7 @@ local function spawnEnemies(spawnPoints, count)
         if randomSpawn and randomSpawn:IsA("BasePart") then
             local enemy = basicEnemyModel:Clone()
             enemy:SetPrimaryPartCFrame(CFrame.new(randomSpawn.Position + Vector3.new(0, 2, 0))) -- Spawn on top of spawn point
-            enemy.Parent = Workspace
+            enemy.Parent = enemiesFolder
 
             -- Add AI script to the enemy
             local aiScript = EnemyAIScript:Clone()
