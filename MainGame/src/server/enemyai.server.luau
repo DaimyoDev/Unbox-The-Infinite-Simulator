@@ -1,6 +1,5 @@
 local Enemy = script.Parent
 if not script.Parent:IsA("Model") then return end
-local EnemiesRemaining = game.ServerStorage.EnemiesRemaining
 
 local legColor = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
 local skinColor = Color3.fromRGB(245, 205, 48)
@@ -11,17 +10,12 @@ Enemy["Left Arm"].Color = skinColor
 Enemy["Right Arm"].Color = skinColor
 local playerChosen
 
-Enemy.Humanoid.Died:Connect(function()
-    EnemiesRemaining.Value -= 1
-end)
-
 legColor = nil
 skinColor = nil
 
-Enemy.Humanoid.WalkSpeed = 15
-
-local PathFindingService = game:GetService("PathfindingService")
+Enemy.Humanoid.WalkSpeed = 20
 task.wait(3)
+local PathFindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players"):GetChildren()
 
 local function findClosestPlayer()
@@ -65,14 +59,16 @@ local function findNewPlayer()
 end
 
 local agentParams = {
-AgentRadius = 10,
-AgentHeight = 1,
+AgentRadius = 1,
+AgentHeight = 5,
 AgentCanJump = true,
-AgentJumpHeight = 10
+AgentJumpHeight = 10,
+AgentCanClimb = true,
+WaypointSpacing = 1
 }
 local path = PathFindingService:CreatePath(agentParams)
 local reachedConnection
-local nextWaypointIndex
+local nextWaypointIndex = 1
 local waypoints
 local cooldown = false
 local GameFunctions = require(game.ReplicatedStorage.Shared.game_functions)
@@ -81,52 +77,40 @@ local function chaseTarget(chosenPlayer)
 
     local playerPosition = chosenPlayer.Character.HumanoidRootPart.Position
     local destination = playerPosition + (chosenPlayer.Character.HumanoidRootPart.AssemblyLinearVelocity) / 1.7
-    chosenPlayer.Character.Humanoid.Died:Connect(function()
-            findNewPlayer()
-            return
-        end)
-    task.wait(0.1)
-    cooldown = false
-    Enemy.HumanoidRootPart.Touched:Connect(function(otherPart)
-    local character = otherPart.Parent:FindFirstChild("Humanoid")
-        if character ~= nil and cooldown == false then
-            GameFunctions.doEnemyDamage(character, character, 10)
-            cooldown = true
-        end
-    end)
 
     local success = pcall(function()  
         path:ComputeAsync(Enemy.HumanoidRootPart.Position, destination)
     end)
-
     if success and path.Status == Enum.PathStatus.Success then
         
         waypoints = path:GetWaypoints()
-    
-        for _, waypoint in waypoints do
-            if waypoint.Action == Enum.PathWaypointAction.Jump then
-                Enemy.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                task.wait(1)
-                Enemy.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-            end
-        end
+
         if not reachedConnection then
-            reachedConnection = Enemy.Humanoid.MoveToFinished:Connect(function(reached)
-                if reached and nextWaypointIndex < #waypoints then
-                    nextWaypointIndex += 1
-                    Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position, chosenPlayer.Character.HumanoidRootPart)
-                end
-            end)
-        end
+			reachedConnection = Enemy.Humanoid.MoveToFinished:Connect(function(reached)
+				if reached and nextWaypointIndex < #waypoints then
+					nextWaypointIndex += 1
+					Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
+                    if waypoints[nextWaypointIndex].Action == Enum.PathWaypointAction.Jump then
+                        Enemy.Humanoid.Jump = true
+                    end
+				end
+			end)
+		end
         nextWaypointIndex = 2
-        Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position, chosenPlayer.Character.HumanoidRootPart)
+		Enemy.Humanoid:MoveTo(waypoints[nextWaypointIndex].Position)
     end
 end
 
+local lastPlayerPosition = nil
+
 while Enemy.Humanoid.Health > 0 do
-    task.wait(0.1)
+    task.wait(1)
     if playerChosen then
-        chaseTarget(playerChosen)
+        local currentPlayerPosition = playerChosen.Character.HumanoidRootPart.Position
+        if lastPlayerPosition == nil or (currentPlayerPosition - lastPlayerPosition).Magnitude > 1 then
+            chaseTarget(playerChosen)
+            lastPlayerPosition = currentPlayerPosition
+        end
     else
         findNewPlayer()
     end
