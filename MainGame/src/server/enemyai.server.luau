@@ -13,7 +13,7 @@ local playerChosen
 legColor = nil
 skinColor = nil
 
-Enemy.Humanoid.WalkSpeed = 20
+Enemy.Humanoid.WalkSpeed = 30
 task.wait(3)
 local PathFindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players"):GetChildren()
@@ -60,7 +60,7 @@ end
 
 local agentParams = {
 AgentRadius = 1,
-AgentHeight = 5,
+AgentHeight = 1,
 AgentCanJump = true,
 AgentJumpHeight = 10,
 AgentCanClimb = true,
@@ -76,7 +76,8 @@ local GameFunctions = require(game.ReplicatedStorage.Shared.game_functions)
 local function chaseTarget(chosenPlayer)
 
     local playerPosition = chosenPlayer.Character.HumanoidRootPart.Position
-    local destination = playerPosition + (chosenPlayer.Character.HumanoidRootPart.AssemblyLinearVelocity) / 1.7
+    local destination = playerPosition + (chosenPlayer.Character.HumanoidRootPart.AssemblyLinearVelocity) / 1.5
+
 
     local success = pcall(function()  
         path:ComputeAsync(Enemy.HumanoidRootPart.Position, destination)
@@ -101,16 +102,10 @@ local function chaseTarget(chosenPlayer)
     end
 end
 
-local lastPlayerPosition = nil
-
 while Enemy.Humanoid.Health > 0 do
-    task.wait(1)
+    task.wait(0.1)
     if playerChosen then
-        local currentPlayerPosition = playerChosen.Character.HumanoidRootPart.Position
-        if lastPlayerPosition == nil or (currentPlayerPosition - lastPlayerPosition).Magnitude > 1 then
-            chaseTarget(playerChosen)
-            lastPlayerPosition = currentPlayerPosition
-        end
+        chaseTarget(playerChosen)
     else
         findNewPlayer()
     end

@@ -49,7 +49,7 @@ local function spawnEnemies(spawnPoints, count)
         local randomSpawn = spawnPoints[math.random(1, #spawnPoints)]
         if randomSpawn and randomSpawn:IsA("BasePart") then
             local enemy = basicEnemyModel:Clone()
-            enemy:SetPrimaryPartCFrame(CFrame.new(randomSpawn.Position + Vector3.new(0, enemy.PrimaryPart.Size.Y / 2, 0))) -- Spawn on top of spawn point
+            enemy:SetPrimaryPartCFrame(CFrame.new(randomSpawn.Position + Vector3.new(0, 2, 0))) -- Spawn on top of spawn point
             enemy.Parent = Workspace
 
             -- Add AI script to the enemy

@@ -16,7 +16,6 @@ function gameFunctions:setPlayerAppearance(player)
     local skinColor = Color3.fromRGB(245, 205, 48)
     player:LoadCharacter()
     local humanoid = player.Character.Humanoid
-    humanoid.WalkSpeed = 16
 
     player.Character.Torso.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
     player.Character.Head.Color = skinColor
